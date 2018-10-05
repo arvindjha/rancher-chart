@@ -1,0 +1,304 @@
+categories:
+- CMS
+questions:
+- variable: defaultImage
+  default: "true"
+  description: "Use default Docker image"
+  label: Use Default Image
+  type: boolean
+  show_subquestion_if: false
+  group: "Container Images"
+  subquestions:
+  - variable: image.repository
+    default: "rancher-worker2:5000/application"
+    description: "S3WaaS District Application image name"
+    type: string
+    label: S3WaaS District Application image name
+  - variable: image.tag
+    default: "3.16.2"
+    description: "S3WaaS District Application image tag"
+    type: string
+    label: Image Tag
+  - variable: mariadb.image.repository
+    default: "mariadb"
+    description: "MariaDB image name"
+    type: string
+    label: MariaDB Image Name
+  - variable: mariadb.image.tag
+    default: "10.3.10"
+    description: "MariaDB image tag"
+    type: string
+    label: MariaDB Image Tag
+
+- variable: applicationTitle
+  default: "District Website"
+  description: "District Website Name"
+  type: string
+  required: true
+  label: District Website Name
+  group: "District Application Settings"
+- variable: applicationAdminUsername
+  default: "admin"
+  description: "District Application Admin Username"
+  type: string
+  required: true
+  label: Admin Username
+  group: "District Application Settings"
+- variable: applicationAdminEmail
+  default: "user@example.com"
+  description: "Admin email"
+  label: Admin email
+  type: string
+  required: true
+  description: "District Application Admin Email"
+  group: "District Application Settings"
+- variable: applicationAdminPassword
+  default: ""
+  description: "password will be auto-generated if not specified"
+  type: password
+  label: Admin Password
+  group: "District Application Settings"
+- variable: applicationMasterURL
+  default: "master.ndcspcl1.awaas.gov.in"
+  label: Golden Image URL
+  type: string
+  required: true
+  description: "Master(Golden) Image URL of S3WaaS District Application"
+  group: "District Application Settings"
+- variable: applicationLanguageName
+  default: "Hindi"
+  label: Language Name
+  type: string
+  required: true
+  description: "District Application language human readable name"
+  group: "District Application Settings"
+- variable: applicationLanguageCode
+  default: "hi"
+  label: Language Code
+  type: string
+  required: true
+  description: "District Application language code to be used in URL"
+  group: "District Application Settings"
+- variable: applicationLanguageLocale
+  default: "hi_IN"
+  label: Language Locale
+  type: string
+  required: true
+  description: "District Application language locale as per I18n standards"
+  group: "District Application Settings"
+- variable: applicationThemeName
+  default: "district-theme-2"
+  label: Theme Code
+  type: string
+  required: true
+  description: "District Application theme code, If you wan to choose theme 1 use district-theme-1"
+  group: "District Application Settings"
+- variable: applicationStagingURL
+  label: Staging URL
+  type: string
+  required: true
+  description: "District Application random generated url with s3waas.gov.in TLD"
+  group: "District Application Settings"
+- variable: applicationAlias
+  default: "https://district.nic.in"
+  label: District Website URL
+  type: string
+  required: true
+  description: "District Application URL on which it would be publicly available"
+  group: "District Application Settings"
+
+- variable: applicationDBUsername
+  default: "s3waas"
+  description: "Database user to create"
+  type: string
+  label: Database Username
+  group: "Application DB Settings"
+- variable: applicationDBPassword
+  default: ""
+  description: "password will be auto-generated if not specified"
+  type: password
+  label: Database Password
+  group: "Application DB Settings"
+
+- variable: applicationS3UploadsBucket
+  default: "master"
+  label: S3 Bucket
+  type: string
+  required: true
+  description: "District Application Object Storage Bucket name"
+  group: "Object Storage"
+- variable: applicationS3UploadsRegion
+  default: "custom"
+  label: S3 Region
+  type: string
+  required: true
+  description: "District Application S3 Uploads bucket region"
+  group: "Object Storage"
+- variable: applicationS3UploadsEndpoint
+  default: "https://static.s3waas.gov.in"
+  label: S3 URL
+  type: string
+  required: true
+  description: "District Application S3 URL endpoint"
+  group: "Object Storage"
+- variable: applicationS3UploadsCDNURL
+  default: "https://cdn.s3waas.gov.in"
+  label: S3 CDN
+  type: string
+  required: true
+  description: "District Application S3 uploads CDN URL (Akamai)"
+  group: "Object Storage"
+- variable: applicationLive
+  default: "false"
+  label: Make Live
+  type: boolean
+  description: "Application settings for sites that are being made Live with district URL"
+  group: "District Application Settings"
+- variable: applicationHTTPS
+  default: "false"
+  label: Application running on HTTPS
+  type: boolean
+  description: "Application HTTPS settings"
+  group: "District Application Settings"
+- variable: persistence.enabled
+  default: "false"
+  description: "Enable persistent volume for S3WaaS District Application"
+  type: boolean
+  required: true
+  label: Enable Persistent Volume Enabled
+  show_subquestion_if: true
+  group: "District Application Settings"
+  subquestions:
+  - variable: persistence.size
+    default: "10Gi"
+    description: "WordPress Persistent Volume Size"
+    type: string
+    label: WordPress Volume Size
+  - variable: persistence.storageClass
+    default: ""
+    description: "If undefined or null, uses the default StorageClass. Default to null"
+    type: storageclass
+    label: Default StorageClass for WordPress
+- variable: mariadb.enabled
+  default: "true"
+  description: "Deploy a database server as part of this deployment, or set to false and configure an external database connection."
+  type: boolean
+  required: true
+  label: Install MariaDB
+  show_subquestion_if: true
+  group: "MariaDB Settings"
+  subquestions:
+  - variable: mariadb.mariadbDatabase
+    default: "awaas_wp_db"
+    description: "Database name to create"
+    type: string
+    label: MariaDB Database
+  - variable: mariadb.mariadbUser
+    default: "s3waas"
+    description: "Database user to create"
+    type: string
+    label: MariaDB User
+  - variable: mariadb.mariadbPassword
+    default: ""
+    description: "password will be auto-generated if not specified"
+    type: password
+    label: MariaDB Password
+- variable: externalDatabase.host
+  default: ""
+  description: "Host of the external database"
+  type: string
+  label: External Database Host
+  show_if: "mariadb.enabled=false"
+  group: "Database Settings"
+- variable: externalDatabase.user
+  default: ""
+  description: "Existing username in the external DB"
+  type: string
+  label: External Database username
+  show_if: "mariadb.enabled=false"
+  group: "Database Settings"
+- variable: externalDatabase.password
+  default: ""
+  description: "External database password"
+  type: password
+  label: External Database password
+  show_if: "mariadb.enabled=false"
+  group: "Database Settings"
+- variable: externalDatabase.database
+  default: ""
+  description: "Name of the existing database"
+  type: string
+  label: External Database
+  show_if: "mariadb.enabled=false"
+  group: "Database Settings"
+- variable: externalDatabase.port
+  default: "3306"
+  description: "External database port number"
+  type: string
+  label: External Database Port
+  show_if: "mariadb.enabled=false"
+  group: "Database Settings"
+- variable: mariadb.persistence.enabled
+  default: "false"
+  description: "Enable persistent volume for MariaDB"
+  type: boolean
+  required: true
+  label: MariaDB Persistent Volume Enabled
+  show_if: "mariadb.enabled=true"
+  show_subquestion_if: true
+  group: "Database Settings"
+  subquestions:
+  - variable: mariadb.persistence.size
+    default: "8Gi"
+    description: "MariaDB Persistent Volume Size"
+    type: string
+    label: MariaDB Volume Size
+  - variable: mariadb.persistence.storageClass
+    default: ""
+    description: "If undefined or null, uses the default StorageClass. Default to null"
+    type: storageclass
+    label: Default StorageClass for MariaDB
+- variable: serviceType
+  default: "ClusterIP"
+  description: "WordPress Service type"
+  type: enum
+  show_if: "ingress.enabled=false"
+  options:
+    - "ClusterIP"
+    - "NodePort"
+    - "LoadBalancer"
+  required: true
+  label: WordPress Service Type
+  show_subquestion_if: "NodePort"
+  group: "Services and Load Balancing"
+  subquestions:
+  - variable: nodePorts.http
+    default: ""
+    description: "NodePort http port(to set explicitly, choose port between 30000-32767)"
+    type: int
+    min: 30000
+    max: 32767
+    show_if: "ingress.enabled=false&&serviceType=NodePort"
+    label: NodePort Http Port
+  - variable: nodePorts.https
+    default: ""
+    description: "NodePort https port(to set explicitly, choose port between 30000-32767)"
+    type: int
+    min: 30000
+    max: 32767
+    show_if: "ingress.enabled=false&&serviceType=NodePort"
+    label: NodePort Https Port
+- variable: ingress.enabled
+  default: "true"
+  description: "Expose app using Layer 7 Load Balancer - ingress"
+  type: boolean
+  label: Expose app using Layer 7 Load Balancer
+  show_subquestion_if: true
+  group: "Services and Load Balancing"
+  subquestions:
+  - variable: ingress.hosts[0].name
+    default: "xip.io"
+    description: "Hostname to your WordPress installation"
+    type: hostname
+    required: true
+    label: Hostname

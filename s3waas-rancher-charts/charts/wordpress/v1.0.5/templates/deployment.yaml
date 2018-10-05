@@ -1,0 +1,178 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ template "fullname" . }}
+    spec:
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+      {{- end}}
+      {{- end }}
+      containers:
+      - name: {{ template "fullname" . }}
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        env:
+        - name: ALLOW_EMPTY_PASSWORD
+        {{- if .Values.allowEmptyPassword }}
+          value: "yes"
+        {{- else }}
+          value: "no"
+        {{- end }}
+
+        - name: MARIADB_HOST
+        {{- if .Values.mariadb.enabled }}
+          value: {{ template "mariadb.fullname" . }}
+        {{- else }}
+          value: {{ .Values.externalDatabase.host | quote }}
+        {{- end }}
+        - name: MARIADB_PORT_NUMBER
+        {{- if .Values.mariadb.enabled }}
+          value: "3306"
+        {{- else }}
+          value: {{ .Values.externalDatabase.port | quote }}
+        {{- end }}
+
+        - name: MYSQL_WP_HOST
+        {{- if .Values.mariadb.enabled }}
+          value: {{ template "mariadb.fullname" . }}
+        {{- else }}
+          value: {{ .Values.externalDatabase.host | quote }}
+        {{- end }}
+        - name: MARIADB_PORT_NUMBER
+        {{- if .Values.mariadb.enabled }}
+          value: "3306"
+        {{- else }}
+          value: {{ .Values.externalDatabase.port | quote }}
+        {{- end }}
+        - name: MYSQL_WP_DBNAME
+        {{- if .Values.mariadb.enabled }}
+          value: {{ .Values.mariadb.mariadbDatabase | quote }}
+        {{- else }}
+          value: {{ .Values.externalDatabase.database | quote }}
+        {{- end }}
+        - name: MYSQL_WP_USER
+        {{- if .Values.mariadb.enabled }}
+          value: {{ .Values.applicationDBUsername | quote }}
+        {{- else }}
+          value: {{ .Values.externalDatabase.user | quote }}
+        {{- end }}
+        - name: MYSQL_WP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+            {{- if .Values.mariadb.enabled }}
+              name: {{ template "fullname" . }}
+              key: MYSQL_WP_PASSWORD
+            {{- else }}
+              name: {{ printf "%s-%s" .Release.Name "externaldb" }}
+              key: db-password
+            {{- end }}
+
+        - name: WP_TITLE
+          value: {{ .Values.applicationTitle | quote }}
+        - name: WP_ADMIN_USER
+          value: {{ .Values.applicationAdminUsername | quote }}
+        - name: WP_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "fullname" . }}
+              key: WP_ADMIN_PASSWORD
+        - name: WP_ADMIN_EMAIL
+          value: {{ .Values.applicationAdminEmail | quote }}
+        # - name: WORDPRESS_FIRST_NAME
+        #   value: {{ .Values.wordpressFirstName | quote }}
+        # - name: WORDPRESS_LAST_NAME
+        #   value: {{ .Values.wordpressLastName | quote }}
+        # - name: WORDPRESS_BLOG_NAME
+        #   value: {{ .Values.wordpressBlogName | quote }}
+        # - name: WORDPRESS_TABLE_PREFIX
+        #   value: {{ .Values.wordpressTablePrefix | quote }}
+
+        - name: WP_HTTPS
+          value: {{ .Values.applicationHTTPS | quote }}
+        - name: WP_URL
+          value: {{ .Values.applicationStagingURL | quote }}
+        - name: WP_ALIAS
+          value: {{ .Values.applicationAlias | quote }}
+        - name: WP_LIVE
+          value: {{ .Values.applicationLive | quote }}
+        # - name: WP_CDN
+        #   value: {{ .Values.applicationCDN | quote }}
+        - name: S3WAAS_APP_TAG
+          value: {{ .Values.applicationTag | quote }}
+
+        - name: WP_FIND_URL
+          value: {{ .Values.applicationMasterURL | quote }}
+        - name: WP_LANG_NAME
+          value: {{ .Values.applicationLanguageName | quote }}
+        - name: WP_LANG_CODE
+          value: {{ .Values.applicationLanguageCode | quote }}
+        - name: WP_LANG_LOCALE
+          value: {{ .Values.applicationLanguageLocale | quote }}
+        - name: WP_THEME_NAME
+          value: {{ .Values.applicationThemeName | quote }}
+
+        - name: S3_UPLOADS_BUCKET
+          value: {{ .Values.applicationS3UploadsBucket | quote }}
+        - name: S3_UPLOADS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "fullname" . }}
+              key: S3_UPLOADS_KEY
+        - name: S3_UPLOADS_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: {{ template "fullname" . }}
+              key: S3_UPLOADS_SECRET
+        - name: S3_UPLOADS_REGION
+          value: {{ .Values.applicationS3UploadsRegion | quote }}
+        - name: S3_UPLOADS_ENDPOINT
+          value: {{ .Values.applicationS3UploadsEndpoint | quote }}
+        - name: S3_UPLOADS_BUCKET_URL
+          value: {{ .Values.applicationS3UploadsBucketURL | quote }}
+        - name: S3_UPLOADS_CDN_URL
+          value: {{ .Values.applicationS3UploadsCDNURL | quote }}
+
+        ports:
+        - name: http
+          containerPort: 80
+        - name: https
+          containerPort: 443
+        livenessProbe:
+          httpGet:
+            path: /version.php
+          {{- if not .Values.healthcheckHttps }}
+            port: http
+          {{- else }}
+            port: https
+            scheme: HTTPS
+          {{- end }}
+{{ toYaml .Values.livenessProbe | indent 10 }}
+        readinessProbe:
+          httpGet:
+            path: /version.php
+          {{- if not .Values.healthcheckHttps }}
+            port: http
+          {{- else }}
+            port: https
+            scheme: HTTPS
+          {{- end }}
+{{ toYaml .Values.readinessProbe | indent 10 }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+    {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end -}}

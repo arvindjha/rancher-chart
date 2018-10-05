@@ -1,0 +1,19 @@
+name: s3waas-district-chart
+version: 1.0.0
+appVersion: 4.9.5
+description: Web publishing platform for building district websites.
+icon: https://s3waas.gov.in/assets/images/district-Logo.png
+keywords:
+- wordpress
+- cms
+- http
+- web
+- application
+- php
+home: https://s3waas.gov.in/
+sources:
+- https://github.com/SkyWalker653/s3waas-rancher-charts
+maintainers:
+- name: Subhransu Sekhar
+  email: subhransu.wsd@nic.in
+engine: gotpl
