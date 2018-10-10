@@ -3,7 +3,8 @@
 ##
 image:
   # registry: docker.io
-  repository: rancher-worker2:5000/application
+  #repository: rancher-worker2:5000/application
+  repository: registry.s3waas.gov.in:5000/application
   tag: 3.16.2
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
